@@ -148,9 +148,10 @@ bot.on("message::url", async (ctx) => {
 
   await ctx.replyWithVideo(new InputFile(`./${filename}`), {
     reply_to_message_id: ctx.message.message_id,
+    supports_streaming: true,
   });
 
-  await fs.unlink(`./${filename}`);
+  fs.unlink(`./${filename}`);
   await statusMessage.delete();
 });
 
