@@ -22,11 +22,10 @@
     "@grammyjs/runner": "^2.0.3",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
-    "get-video-id": "^3.6.5",
     "grammy": "^1.15.3",
     "identify-youtube-shorts": "^1.0.2",
-    "nodejs-file-downloader": "^4.10.6",
-    "youtube-stream-url": "^2.4.1"
+    "util": "^0.12.5",
+    "ytdl-core": "^4.11.3"
   },
   "devDependencies": {}
 }

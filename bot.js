@@ -17,9 +17,8 @@ const { hydrateReply, parseMode } = require("@grammyjs/parse-mode");
 const { run, sequentialize } = require("@grammyjs/runner");
 const { hydrate } = require("@grammyjs/hydrate");
 const check = require("identify-youtube-shorts");
-const Youtube = require("youtube-stream-url");
-const getVideoId = require("get-video-id");
-const Downloader = require("nodejs-file-downloader");
+const ytdl = require("ytdl-core");
+const util = require("util");
 const fs = require("fs");
 
 // Bot
@@ -69,25 +68,32 @@ async function responseTime(ctx, next) {
 // Log
 
 async function log(ctx, next) {
-  const from = ctx.from;
+  let message = ctx.message?.text || ctx.channelPost?.text || undefined;
+  const from = ctx.from || ctx.chat;
   const name =
-    from.last_name === undefined
-      ? from.first_name
-      : `${from.first_name} ${from.last_name}`;
+    `${from.first_name || ""} ${from.last_name || ""}`.trim() || ctx.chat.title;
+
+  // Console
+
   console.log(
-    `From: ${name} (@${from.username}) ID: ${from.id}\nMessage: ${ctx.message.text}`
+    `From: ${name} (@${from.username}) ID: ${from.id}\nMessage: ${message}`
   );
 
-  const msgText = ctx.message.text;
+  // Channel
 
-  if (!msgText.includes("/") && !admins.includes(ctx.chat?.id)) {
+  if (
+    ctx.message &&
+    !ctx.message?.text?.includes("/") &&
+    process.env.LOG_CHANNEL
+  ) {
     await bot.api.sendMessage(
-      process.env.BOT_ADMIN,
-      `<b>From: ${ctx.from.first_name} (@${ctx.from.username}) ID: <code>${ctx.from.id}</code></b>`,
+      process.env.LOG_CHANNEL,
+      `<b>From: ${name} (@${from.username}) ID: <code>${from.id}</code></b>`,
       { parse_mode: "HTML" }
     );
+
     await ctx.api.forwardMessage(
-      process.env.BOT_ADMIN,
+      process.env.LOG_CHANNEL,
       ctx.chat.id,
       ctx.message.message_id
     );
@@ -115,7 +121,7 @@ bot.command("help", async (ctx) => {
 // Shorts
 
 bot.on("message::url", async (ctx) => {
-  const { id } = getVideoId(ctx.message.text);
+  const id = ytdl.getURLVideoID(ctx.message.text);
 
   if (!(await check(id))) {
     await ctx.reply("*Send a valid YouTube shorts link.*");
@@ -124,34 +130,53 @@ bot.on("message::url", async (ctx) => {
 
   const statusMessage = await ctx.reply("*Downloading*");
 
-  const hdurl = await Youtube.getInfo({
-    url: ctx.message.text,
-  }).then(async (video) => {
-    const formatDetails = video.formats.find(
-      (format) =>
-        format.qualityLabel === "1080p" || format.qualityLabel === "1080p60"
-    );
-
-    const formatUrl = formatDetails ? formatDetails.url : null;
-    return formatUrl;
-  });
-
   let filename = `${id}.mp4`;
 
-  const downloader = new Downloader({
-    url: hdurl,
-    directory: "./",
-    fileName: filename,
-  });
+  async function download(url) {
+    return new Promise((resolve, reject) => {
+      const videoStream = ytdl(url);
+      const writeStream = fs.createWriteStream(filename);
 
-  await downloader.download();
+      videoStream.on("error", (error) => {
+        reject(error);
+      });
 
-  await ctx.replyWithVideo(new InputFile(`./${filename}`), {
-    reply_to_message_id: ctx.message.message_id,
-    supports_streaming: true,
-  });
+      writeStream.on("close", () => {
+        resolve();
+      });
 
-  fs.unlink(`./${filename}`);
+      videoStream.pipe(writeStream);
+    });
+  }
+
+  await download(ctx.message.text)
+    .then(async () => {
+      console.log(`Video ID: ${filename} downloaded successfully.`);
+
+      const stat = util.promisify(fs.stat);
+      const unlink = util.promisify(fs.unlink);
+
+      const stats = await stat(filename);
+      const fileSizeInBytes = stats.size;
+      const size = fileSizeInBytes / (1024 * 1024);
+
+      if (size < 50) {
+        await ctx.replyWithVideo(new InputFile(filename), {
+          reply_to_message_id: ctx.message.message_id,
+          supports_streaming: true,
+        });
+      } else {
+        await ctx.reply("*Video is over 50MB.*", {
+          reply_to_message_id: ctx.message.message_id,
+        });
+      }
+
+      await unlink(`./${filename}`);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
   await statusMessage.delete();
 });
 
