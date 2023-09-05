@@ -22,7 +22,6 @@ import {
   HttpError,
 } from "grammy";
 import { hydrateReply, parseMode } from "@grammyjs/parse-mode";
-import { run, sequentialize } from "@grammyjs/runner";
 import check from "identify-youtube-shorts";
 import ytdl from "ytdl-core";
 
@@ -33,16 +32,8 @@ if (!process.env.BOT_TOKEN) {
 }
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// Concurrency
-
-function getSessionKey(ctx) {
-  return ctx.chat?.id.toString();
-}
-
 // Plugins
 
-bot.use(sequentialize(getSessionKey));
-bot.use(session({ getSessionKey }));
 bot.use(limitExecutionTime);
 bot.use(responseTime);
 bot.use(log);
