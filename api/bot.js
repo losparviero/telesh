@@ -52,6 +52,8 @@ bot.use(hydrateReply);
 
 bot.api.config.use(parseMode("Markdown"));
 
+// Timeout
+
 async function limitExecutionTime(ctx, next) {
   try {
     await Promise.race([
@@ -64,7 +66,9 @@ async function limitExecutionTime(ctx, next) {
       ),
     ]);
   } catch (error) {
-    await ctx.reply("Execution timeout");
+    await ctx.reply("*Execution timeout.*\n_Download took too long._", {
+      reply_to_message_id: ctx.message.message_id,
+    });
   }
 }
 
