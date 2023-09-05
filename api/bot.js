@@ -52,26 +52,6 @@ bot.use(hydrateReply);
 
 bot.api.config.use(parseMode("Markdown"));
 
-// Timeout
-
-async function limitExecutionTime(ctx, next) {
-  try {
-    await Promise.race([
-      next(),
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error("Execution time limit exceeded")),
-          9000
-        )
-      ),
-    ]);
-  } catch (error) {
-    await ctx.reply("*Execution timeout.*\n_Download took too long._", {
-      reply_to_message_id: ctx.message.message_id,
-    });
-  }
-}
-
 // Response
 
 async function responseTime(ctx, next) {
@@ -99,6 +79,26 @@ async function log(ctx, next) {
     );
   }
   await next();
+}
+
+// Timeout
+
+async function limitExecutionTime(ctx, next) {
+  try {
+    await Promise.race([
+      next(),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Execution time limit exceeded")),
+          9500
+        )
+      ),
+    ]);
+  } catch (error) {
+    await ctx.reply("*Execution timeout.*\n_Download took too long._", {
+      reply_to_message_id: ctx.message.message_id,
+    });
+  }
 }
 
 // Commands
