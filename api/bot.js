@@ -172,4 +172,4 @@ bot.catch((err) => {
 
 // Run
 
-webhookCallback(bot, "https");
+export default webhookCallback(bot, "https");
