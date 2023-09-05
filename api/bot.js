@@ -65,7 +65,6 @@ async function limitExecutionTime(ctx, next) {
     ]);
   } catch (error) {
     await ctx.reply("Execution timeout");
-    throw error;
   }
 }
 
