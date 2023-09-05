@@ -43,6 +43,7 @@ function getSessionKey(ctx) {
 
 bot.use(sequentialize(getSessionKey));
 bot.use(session({ getSessionKey }));
+bot.use(limitExecutionTime);
 bot.use(responseTime);
 bot.use(log);
 bot.use(hydrateReply);
@@ -50,6 +51,23 @@ bot.use(hydrateReply);
 // Parse
 
 bot.api.config.use(parseMode("Markdown"));
+
+async function limitExecutionTime(ctx, next) {
+  try {
+    await Promise.race([
+      next(),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Execution time limit exceeded")),
+          9000
+        )
+      ),
+    ]);
+  } catch (error) {
+    await ctx.reply("Execution timeout");
+    throw error;
+  }
+}
 
 // Response
 
