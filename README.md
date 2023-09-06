@@ -2,7 +2,14 @@
 
 Download YouTube Shorts in Telegram!
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Flosparviero%2Fytsh&env=BOT_TOKEN)
+### Install
+
+1. Clone repo.
+2. Run ```npm i``` in project folder.
+3. Rename example.env to .env and populate env variables.
+4. Run ```npm start``` to start the bot.
+
+#### It's advisable to run the bot using PM2 or any startup manager for persistent execution.
 
 ### License
 
