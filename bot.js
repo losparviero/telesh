@@ -13,15 +13,9 @@
 
 import dotenv from "dotenv";
 dotenv.config();
-import {
-  Bot,
-  session,
-  InputFile,
-  webhookCallback,
-  GrammyError,
-  HttpError,
-} from "grammy";
+import { Bot, InputFile, GrammyError, HttpError } from "grammy";
 import { hydrateReply, parseMode } from "@grammyjs/parse-mode";
+import { run, sequentialize } from "@grammyjs/runner";
 import check from "identify-youtube-shorts";
 import ytdl from "ytdl-core";
 
@@ -32,9 +26,16 @@ if (!process.env.BOT_TOKEN) {
 }
 const bot = new Bot(process.env.BOT_TOKEN);
 
+// Concurrency
+
+function getSessionKey(ctx) {
+  return ctx.chat?.id.toString();
+}
+
 // Plugins
 
-bot.use(limitExecutionTime);
+bot.use(sequentialize(getSessionKey));
+bot.use(session({ getSessionKey }));
 bot.use(responseTime);
 bot.use(log);
 bot.use(hydrateReply);
@@ -70,26 +71,6 @@ async function log(ctx, next) {
     );
   }
   await next();
-}
-
-// Timeout
-
-async function limitExecutionTime(ctx, next) {
-  try {
-    await Promise.race([
-      next(),
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error("Execution time limit exceeded")),
-          9500
-        )
-      ),
-    ]);
-  } catch (error) {
-    await ctx.reply("*Execution timeout.*\n_Download took too long._", {
-      reply_to_message_id: ctx.message.message_id,
-    });
-  }
 }
 
 // Commands
@@ -184,4 +165,5 @@ bot.catch((err) => {
 
 // Run
 
-export default webhookCallback(bot, "https");
+console.log(`[INIT ${new Date(Date.now()).toLocaleString()}] Bot running.`);
+run(bot);

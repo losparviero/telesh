@@ -2,10 +2,10 @@
   "name": "tgsh",
   "version": "1.0.0",
   "description": "Download YouTube shorts in Telegram!",
-  "main": "src/bot.js",
+  "main": "bot.js",
   "type": "module",
   "scripts": {
-    "start": "node src/bot.js",
+    "start": "node bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
@@ -16,6 +16,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "@grammyjs/parse-mode": "^1.6.0",
+    "@grammyjs/runner": "^2.0.3",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
     "grammy": "^1.15.3",
