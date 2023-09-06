@@ -119,13 +119,14 @@ bot.on("message::url", async (ctx) => {
       const buffer = Buffer.from(await video.arrayBuffer());
       const maxFileSize = 50 * 1024 * 1024;
       if (buffer.length <= maxFileSize) {
+        await ctx.replyWithChatAction("upload_video");
         await ctx.replyWithVideo(new InputFile(buffer), {
           supports_streaming: true,
           reply_to_message_id: ctx.message.message_id,
         });
       } else {
         await ctx.reply(
-          "*File size too big.*_Couldn't be downloaded due to Telegram limits._",
+          "*File size too big.*\n_Couldn't be downloaded due to Telegram limits._",
           { reply_to_message_id: ctx.message.message_id }
         );
       }
