@@ -117,10 +117,18 @@ bot.on("message::url", async (ctx) => {
     const video = await fetch(format.url);
     if (video.ok) {
       const buffer = Buffer.from(await video.arrayBuffer());
-      await ctx.replyWithVideo(new InputFile(buffer), {
-        supports_streaming: true,
-        reply_to_message_id: ctx.message.message_id,
-      });
+      const maxFileSize = 50 * 1024 * 1024;
+      if (buffer.length <= maxFileSize) {
+        await ctx.replyWithVideo(new InputFile(buffer), {
+          supports_streaming: true,
+          reply_to_message_id: ctx.message.message_id,
+        });
+      } else {
+        await ctx.reply(
+          "*File size too big.*_Couldn't be downloaded due to Telegram limits._",
+          { reply_to_message_id: ctx.message.message_id }
+        );
+      }
     } else {
       throw new Error("Error downloading gif.");
     }
