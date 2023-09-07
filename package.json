@@ -15,14 +15,14 @@
   },
   "license": "AGPL-3.0",
   "dependencies": {
+    "@distube/ytdl-core": "^4.13.0",
     "@grammyjs/parse-mode": "^1.6.0",
     "@grammyjs/runner": "^2.0.3",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
     "grammy": "^1.15.3",
     "identify-youtube-shorts": "^1.0.2",
-    "util": "^0.12.5",
-    "ytdl-core": "^4.11.5"
+    "util": "^0.12.5"
   },
   "devDependencies": {}
 }

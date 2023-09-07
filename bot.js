@@ -17,7 +17,7 @@ import { Bot, InputFile, session, GrammyError, HttpError } from "grammy";
 import { hydrateReply, parseMode } from "@grammyjs/parse-mode";
 import { run, sequentialize } from "@grammyjs/runner";
 import check from "identify-youtube-shorts";
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 
 // Bot
 
