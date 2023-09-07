@@ -94,7 +94,7 @@ bot.command("help", async (ctx) => {
 bot.on("message::url", async (ctx) => {
   const urlRegex = /(https?:\/\/[^\s]+)/;
   const match = urlRegex.exec(ctx.message.text);
-  if (match === null) {
+  if (!match) {
     await ctx.reply("*Send a valid YouTube shorts link.*", {
       reply_to_message_id: ctx.message.message_id,
     });
@@ -102,7 +102,7 @@ bot.on("message::url", async (ctx) => {
   }
 
   const yturl = match[1];
-  const id = ytdl.getVideoID(yturl);
+  const id = ytdl.getURLVideoID(yturl);
   if (!(await check(id))) {
     await ctx.reply("*Send a valid YouTube shorts link.*", {
       reply_to_message_id: ctx.message.message_id,
