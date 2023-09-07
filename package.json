@@ -1,6 +1,6 @@
 {
   "name": "tgsh",
-  "version": "1.0.0",
+  "version": "0.1.4",
   "description": "Download YouTube shorts in Telegram!",
   "main": "bot.js",
   "type": "module",
@@ -22,7 +22,7 @@
     "grammy": "^1.15.3",
     "identify-youtube-shorts": "^1.0.2",
     "util": "^0.12.5",
-    "ytdl-core": "4.9.1"
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {}
 }
