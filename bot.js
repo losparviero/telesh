@@ -62,7 +62,7 @@ async function log(ctx, next) {
       ? from.first_name
       : `${from.first_name} ${from.last_name}`;
   let message;
-  if (ctx.message?.text && !ctx.message.text.includes("/")) {
+  if (ctx.message?.text && !ctx.message.text.startsWith("/")) {
     message = ctx.message.text;
   }
   if (message != undefined) {
