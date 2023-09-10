@@ -121,6 +121,8 @@ bot.on("message::url", async (ctx) => {
       if (buffer.length <= maxFileSize) {
         await ctx.replyWithChatAction("upload_video");
         await ctx.replyWithVideo(new InputFile(buffer), {
+          height: "1920",
+          width: "1080",
           supports_streaming: true,
           reply_to_message_id: ctx.message.message_id,
         });
