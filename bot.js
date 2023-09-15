@@ -92,20 +92,22 @@ bot.command("help", async (ctx) => {
 
 // Shorts
 
-const params = { reply_to_message_id: ctx.message.message_id };
-
 bot.on("message::url", async (ctx) => {
   const urlRegex = /(https?:\/\/[^\s]+)/;
   const match = urlRegex.exec(ctx.message.text);
   if (!match) {
-    await ctx.reply("*Send a valid YouTube shorts link.*", params);
+    await ctx.reply("*Send a valid YouTube shorts link.*", {
+      reply_to_message_id: ctx.message.message_id,
+    });
     return;
   }
 
   const yturl = match[1];
   const id = ytdl.getURLVideoID(yturl);
   if (!(await check(id))) {
-    await ctx.reply("*Send a valid YouTube shorts link.*", params);
+    await ctx.reply("*Send a valid YouTube shorts link.*", {
+      reply_to_message_id: ctx.message.message_id,
+    });
     return;
   }
   await ctx.replyWithChatAction("upload_video");
@@ -129,7 +131,7 @@ bot.on("message::url", async (ctx) => {
       } else {
         await ctx.reply(
           "*File size too big.*\n_Couldn't be downloaded due to Telegram limits._",
-          params
+          { reply_to_message_id: ctx.message.message_id }
         );
       }
     } else {
@@ -140,14 +142,18 @@ bot.on("message::url", async (ctx) => {
       console.log("Format not found.");
     }
     console.log(error);
-    await ctx.reply(`*There was an error.*\n_${error.message}_`, params);
+    await ctx.reply(`*There was an error.*\n_${error.message}_`, {
+      reply_to_message_id: ctx.message.message_id,
+    });
   }
 });
 
 // Messages
 
 bot.on("message:text", async (ctx) => {
-  await ctx.reply("*Send a valid YouTube shorts link.*", params);
+  await ctx.reply("*Send a valid YouTube shorts link.*", {
+    reply_to_message_id: ctx.message.message_id,
+  });
 });
 
 // Error
