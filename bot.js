@@ -40,7 +40,7 @@ bot.use(responseTime);
 bot.use(log);
 bot.use(hydrateReply);
 
-// Parse
+// Config
 
 bot.api.config.use(parseMode("Markdown"));
 
@@ -55,12 +55,13 @@ async function responseTime(ctx, next) {
 
 // Log
 
+let name;
+
 async function log(ctx, next) {
   const from = ctx.from;
-  const name =
-    from.last_name === undefined
-      ? from.first_name
-      : `${from.first_name} ${from.last_name}`;
+  name =
+    (from.first_name !== undefined ? from.first_name : "") +
+    (from.last_name !== undefined ? ` ${from.last_name}` : "");
   let message;
   if (ctx.message?.text && !ctx.message.text.startsWith("/")) {
     message = ctx.message.text;
@@ -77,7 +78,7 @@ async function log(ctx, next) {
 
 bot.command("start", async (ctx) => {
   await ctx
-    .reply("*Welcome!* ✨\nSend a YouTube shorts link.")
+    .reply(`*Welcome! ${name} * ✨\nSend a YouTube shorts link.`)
     .then(console.log("New user added:", ctx.from));
 });
 
@@ -91,30 +92,29 @@ bot.command("help", async (ctx) => {
 
 // Shorts
 
+const params = { reply_to_message_id: ctx.message.message_id };
+
 bot.on("message::url", async (ctx) => {
   const urlRegex = /(https?:\/\/[^\s]+)/;
   const match = urlRegex.exec(ctx.message.text);
   if (!match) {
-    await ctx.reply("*Send a valid YouTube shorts link.*", {
-      reply_to_message_id: ctx.message.message_id,
-    });
+    await ctx.reply("*Send a valid YouTube shorts link.*", params);
     return;
   }
 
   const yturl = match[1];
   const id = ytdl.getURLVideoID(yturl);
   if (!(await check(id))) {
-    await ctx.reply("*Send a valid YouTube shorts link.*", {
-      reply_to_message_id: ctx.message.message_id,
-    });
+    await ctx.reply("*Send a valid YouTube shorts link.*", params);
     return;
   }
   await ctx.replyWithChatAction("upload_video");
 
   try {
     let info = await ytdl.getInfo(id);
-    let format = ytdl.chooseFormat(info.formats, { quality: "highestvideo" });
+    let format = ytdl.chooseFormat(info.formats, { quality: "highest" });
     const video = await fetch(format.url);
+
     if (video.ok) {
       const buffer = Buffer.from(await video.arrayBuffer());
       const maxFileSize = 50 * 1024 * 1024;
@@ -129,7 +129,7 @@ bot.on("message::url", async (ctx) => {
       } else {
         await ctx.reply(
           "*File size too big.*\n_Couldn't be downloaded due to Telegram limits._",
-          { reply_to_message_id: ctx.message.message_id }
+          params
         );
       }
     } else {
@@ -140,18 +140,14 @@ bot.on("message::url", async (ctx) => {
       console.log("Format not found.");
     }
     console.log(error);
-    await ctx.reply(`*There was an error.*\n_${error.message}_`, {
-      reply_to_message_id: ctx.message.message_id,
-    });
+    await ctx.reply(`*There was an error.*\n_${error.message}_`, params);
   }
 });
 
 // Messages
 
 bot.on("message:text", async (ctx) => {
-  await ctx.reply("*Send a valid YouTube shorts link.*", {
-    reply_to_message_id: ctx.message.message_id,
-  });
+  await ctx.reply("*Send a valid YouTube shorts link.*", params);
 });
 
 // Error
