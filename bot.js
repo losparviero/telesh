@@ -115,7 +115,7 @@ bot.on("message::url", async (ctx) => {
   try {
     let info = await ytdl.getInfo(id);
     let format = ytdl.chooseFormat(info.formats, {
-      quality: "bestvideo[ext=mp4]+(258/256/140)",
+      quality: "22",
     });
     const video = await fetch(format.url);
 
