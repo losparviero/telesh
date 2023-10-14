@@ -78,7 +78,7 @@ async function log(ctx, next) {
 
 bot.command("start", async (ctx) => {
   await ctx
-    .reply(`*Welcome! ${name} * ✨\nSend a YouTube shorts link.`)
+    .reply(`*Welcome ${name} * ✨\nSend a YouTube shorts link.`)
     .then(console.log("New user added:", ctx.from));
 });
 
@@ -114,7 +114,9 @@ bot.on("message::url", async (ctx) => {
 
   try {
     let info = await ytdl.getInfo(id);
-    let format = ytdl.chooseFormat(info.formats, { quality: "highest" });
+    let format = ytdl.chooseFormat(info.formats, {
+      quality: "bestvideo[ext=mp4]+(258/256/140)",
+    });
     const video = await fetch(format.url);
 
     if (video.ok) {
@@ -158,7 +160,7 @@ bot.on("message:text", async (ctx) => {
 
 // Error
 
-bot.catch((err) => {
+bot.catch(async (err) => {
   const ctx = err.ctx;
   console.error("Error while handling update", ctx.update.update_id);
   const e = err.error;
@@ -166,14 +168,14 @@ bot.catch((err) => {
     console.error("Error in request:", e.description);
     if (e.description === "Forbidden: bot was blocked by the user") {
       console.log("Bot was blocked by the user");
-    } else {
-      ctx.reply("An error occurred");
+      return;
     }
   } else if (e instanceof HttpError) {
     console.error("Could not contact Telegram:", e);
   } else {
     console.error("Unknown error:", e);
   }
+  await ctx.reply("An error occurred");
 });
 
 // Run
